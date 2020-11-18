@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import * as btoa from 'btoa';
+import { map } from 'rxjs/operators';
+import * as sortBy from 'lodash.sortby';
+
 
 @Injectable({
     providedIn: 'root'
@@ -26,7 +29,13 @@ export class NewsService {
     getUnreadArticles() {
         return this.http.get(`${this.baseUrl}items?type=3&getRead=false&batchSize=-1`, {
             headers: this.getHeaders()
-        });
+        }).pipe(
+            map((data:any) => {
+                // TODO get sort setting from preferences
+                data.items = sortBy(data.items, 'pubDate')
+                return data;
+            })
+        );
     }
 
     markAsRead(itemId: string) {
